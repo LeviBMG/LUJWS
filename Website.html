@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<head>
+<title>LUJWS</title>
+<style>
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+button {
+    background-color: #dddddd;
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+body.dark-mode button {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    h1, h2, p, input, button, iframe {
+        width: 100%;
+        font-size: 1em;
+    }
+
+    iframe {
+        height: 300px;
+    }
+}
+</style>
+<script>
+    // Überprüfen, ob der Benutzer angemeldet ist
+    if (!sessionStorage.getItem('username')) {
+        window.location.href = "index.html"; // Weiterleitung zur Anmeldeseite
+    }
+
+    // Funktion zum Anwenden des Modus beim Laden
+    window.onload = function() {
+        // Dark Mode direkt anwenden, falls ausgewählt
+        const preferredMode = localStorage.getItem('theme') || 'dark'; 
+        document.body.classList.toggle('dark-mode', preferredMode === 'dark');
+        resetInactivityTimer();
+    };
+
+    // Funktion zum Umschalten des Modus
+    function toggleTheme() {
+        const currentTheme = document.body.classList.toggle('dark-mode');
+        const theme = currentTheme ? 'dark' : 'light';
+        localStorage.setItem('theme', theme); // Auswahl in localStorage speichern
+    }
+
+    // Logout-Funktion
+    function logout() {
+        sessionStorage.removeItem('username');
+        window.location.href = "index.html"; // Zurück zur Anmeldeseite
+    }
+
+    // Inaktivitäts-Überwachung
+    let inactivityTimer;
+    let warningTimer;
+
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        clearTimeout(warningTimer);
+
+        // Nach 20 Minuten Inaktivität eine Warnung zeigen
+        warningTimer = setTimeout(function() {
+            alert("Du warst 20 Minuten inaktiv. Du wirst in 5 Minuten automatisch abgemeldet.");
+        }, 20 * 60 * 1000);
+
+        // Nach 25 Minuten Inaktivität abmelden
+        inactivityTimer = setTimeout(function() {
+            logout();
+            alert("Du wurdest wegen Inaktivität abgemeldet.");
+        }, 25 * 60 * 1000);
+    }
+
+    window.onmousemove = resetInactivityTimer;
+    window.onkeydown = resetInactivityTimer;
+</script>
+</head>
+<body>
+    <h1>
+        Herzlich Willkommen!
+    
+    </h1>
+    <h2>Was mächtest du tun?</h2>
+    <div class="line"></div>
+    <a href="tictactoe.html"><button type="button">Tic Tac Toe</button></a>
+    <div class="line"></div>
+    <a href="jump_and_run.html"><button type="button">Jump and Run</button></a>
+    <div class="line"></div>
+    <a href="png.html"><button type="button">Pong</button></a>
+
+    <div class="line"></div>
+    <p class="text">Version Alpha 0.0.1</p>
+    <p class="text-accent">Viel Spaß beim benutzen</p>
+    <p class="text-accent">Erstellt von Levi Geimer und Julian Slotosch</p>
+    <p class="text-accent">Alle rechte Vorbehalten</p>
+</body>
