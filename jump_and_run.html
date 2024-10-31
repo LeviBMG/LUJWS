@@ -91,12 +91,31 @@
             gameLoop();
         }
 
+        // Funktion zum Springen
+        function jump() {
+            if (playerY >= SCREEN_HEIGHT - playerHeight - 50) { // Überprüfe, ob der Spieler den Boden berührt
+                playerVelocityY = jumpForce; // Spieler springt
+            }
+        }
+
         // Tasteneingaben
         document.addEventListener("keydown", (event) => {
             if (event.code === "Space" && gameActive) {
-                if (playerY >= SCREEN_HEIGHT - playerHeight - 50) { // Überprüfe, ob der Spieler den Boden berührt
-                    playerVelocityY = jumpForce; // Spieler springt
-                }
+                jump();
+            }
+        });
+
+        // Maus- und Touch-Eingaben
+        canvas.addEventListener("mousedown", () => {
+            if (gameActive) {
+                jump();
+            }
+        });
+
+        canvas.addEventListener("touchstart", (event) => {
+            event.preventDefault(); // Verhindert das Scrollen der Seite bei Touch
+            if (gameActive) {
+                jump();
             }
         });
 
