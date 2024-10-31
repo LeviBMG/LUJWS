@@ -52,7 +52,8 @@
 </div>
 <canvas id="pong" width="800" height="400"></canvas>
 <div id="controls">
-  Steuerung: Pfeiltaste nach oben / nach unten
+  Steuerung: Pfeiltaste nach oben / nach unten oder Touch-Buttons     
+  Mobile Steuerung: Swipen
 </div>
 <div id="buttons">
   <button id="resetButton">Zurücksetzen</button>
@@ -88,48 +89,59 @@
     difficulty = selectedDifficulty;
     document.getElementById('menu').style.display = 'none'; // Menü ausblenden
     canvas.style.display = 'block'; // Canvas anzeigen
+    resizeCanvas(); // Canvas anpassen
     draw(); // Spiel starten
+  }
+
+  function resizeCanvas() {
+    const scale = Math.min(window.innerWidth / 800, window.innerHeight / 400);
+    canvas.width = 800 * scale;
+    canvas.height = 400 * scale;
+
+    // Positionen zurücksetzen
+    playerY = (canvas.height - paddleHeight) / 2;
+    computerY = (canvas.height - paddleHeight) / 2;
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
   }
 
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw paddles
+    // Paddles zeichnen
     context.fillStyle = 'white';
     context.fillRect(0, playerY, paddleWidth, paddleHeight);
     context.fillRect(canvas.width - paddleWidth, computerY, paddleWidth, paddleHeight);
 
-    // Draw ball
+    // Ball zeichnen
     context.beginPath();
     context.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
     context.fill();
     context.closePath();
 
-    // Update ball position
+    // Ballposition aktualisieren
     ballX += ballSpeedX;
     ballY += ballSpeedY;
 
-    // Ball collision with top/bottom
+    // Ball-Kollision mit oben/unten
     if (ballY + ballSize > canvas.height || ballY - ballSize < 0) {
       ballSpeedY = -ballSpeedY;
     }
 
-    // Ball collision with paddles
+    // Ball-Kollision mit Paddles
     if (ballX < paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
       ballSpeedX = -ballSpeedX;
       ballX = paddleWidth; // Verhindert das Durchdringen
-      // Schlagrichtung des Computers anpassen
       ballSpeedY += Math.random() * 4 - 2; // Unvorhersehbare Y-Richtung
       increaseBallSpeed(); // Ballgeschwindigkeit erhöhen
     } else if (ballX > canvas.width - paddleWidth && ballY > computerY && ballY < computerY + paddleHeight) {
       ballSpeedX = -ballSpeedX;
       ballX = canvas.width - paddleWidth - ballSize; // Verhindert das Durchdringen
-      // Schlagrichtung des Computers anpassen
       ballSpeedY += Math.random() * 4 - 2; // Unvorhersehbare Y-Richtung
       increaseBallSpeed(); // Ballgeschwindigkeit erhöhen
     }
 
-    // Ball goes out of bounds
+    // Ball geht aus dem Spielfeld
     if (ballX < 0) {
       computerScore++;
       resetBall();
@@ -138,11 +150,11 @@
       resetBall();
     }
 
-    // Update scoreboard
+    // Punktestand aktualisieren
     document.getElementById('playerScore').textContent = playerScore;
     document.getElementById('computerScore').textContent = computerScore;
 
-    // End game if a player reaches 10 points
+    // Spiel beenden, wenn ein Spieler 10 Punkte erreicht
     if (playerScore >= 10) {
       alert("Du hast gewonnen!");
       resetToMenu();
@@ -151,7 +163,7 @@
       resetToMenu();
     }
 
-    // Move computer paddle based on difficulty
+    // Computer-Paddle bewegen
     if (difficulty === 'hard') {
       moveComputerHard();
     } else {
@@ -178,7 +190,6 @@
   }
 
   function moveComputerHard() {
-    // Unvorhersehbare Bewegung der Computerplattform
     if (ballY < computerY + paddleHeight / 2 && ballX > canvas.width / 2) {
       computerY -= 6 + Math.random() * 2; // schnelles und unvorhersehbares Verhalten
     } else if (ballY > computerY + paddleHeight / 2 && ballX > canvas.width / 2) {
@@ -243,6 +254,24 @@
 
   // Reset Button Event Listener
   document.getElementById('resetButton').addEventListener('click', resetToMenu);
+
+  // Touchsteuerung für mobile Geräte
+  document.addEventListener('touchstart', (event) => {
+    const touchY = event.touches[0].clientY;
+    if (touchY < window.innerHeight / 2) {
+      isUpPressed = true;
+    } else {
+      isDownPressed = true;
+    }
+  });
+
+  document.addEventListener('touchend', () => {
+    isUpPressed = false;
+    isDownPressed = false;
+  });
+
+  // Resize-Event für die Canvas-Größe
+  window.addEventListener('resize', resizeCanvas);
 
 </script>
 
