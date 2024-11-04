@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schachspiel gegen den Computer</title>
+  <link rel="stylesheet" href="https://unpkg.com/chessboard-js@1.0.0/dist/chessboard-1.0.0.min.css">
+  <style>
+    #board {
+      width: 400px;
+      margin: 20px auto;
+    }
+    .status {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">Schachspiel gegen den Computer</h2>
+<div id="board"></div>
+<div class="status" id="status"></div>
+
+<script src="https://unpkg.com/chessboard-js@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+  // Initialisiere das Schachspiel und das Schachbrett
+  const board = Chessboard('board', {
+    draggable: true,
+    position: 'start',
+    onDrop: handleMove
+  });
+  const game = new Chess();
+
+  function handleMove(source, target) {
+    const move = game.move({
+      from: source,
+      to: target,
+      promotion: 'q' // automatisch zur Dame aufwerten
+    });
+
+    if (move === null) return 'snapback';
+
+    updateStatus();
+    window.setTimeout(makeComputerMove, 250);
+  }
+
+  function makeComputerMove() {
+    const possibleMoves = game.ugly_moves();
+    
+    if (possibleMoves.length === 0) return;
+
+    // Wähle den besten Zug
+    const bestMove = getBestMove(game);
+    game.move(bestMove);
+    board.position(game.fen());
+
+    updateStatus();
+  }
+
+  function getBestMove(game) {
+    const moves = game.ugly_moves();
+    let bestMove = null;
+    let bestValue = -Infinity;
+
+    for (const move of moves) {
+      game.ugly_move(move);
+      const boardValue = evaluateBoard(game.board());
+      game.undo();
+
+      if (boardValue > bestValue) {
+        bestValue = boardValue;
+        bestMove = move;
+      }
+    }
+    return bestMove;
+  }
+
+  function evaluateBoard(board) {
+    const pieceValues = {
+      p: 1, n: 3, b: 3, r: 5, q: 9, k: 0,
+      P: -1, N: -3, B: -3, R: -5, Q: -9, K: 0
+    };
+
+    let totalEvaluation = 0;
+    for (const row of board) {
+      for (const piece of row) {
+        if (piece) {
+          totalEvaluation += pieceValues[piece.type] * (piece.color === 'w' ? 1 : -1);
+        }
+      }
+    }
+    return totalEvaluation;
+  }
+
+  function updateStatus() {
+    let status = '';
+    if (game.in_checkmate()) {
+      status = 'Schachmatt! ' + (game.turn() === 'w' ? 'Schwarz' : 'Weiß') + ' hat gewonnen.';
+    } else if (game.in_draw()) {
+      status = 'Unentschieden!';
+    } else {
+      status = 'Am Zug: ' + (game.turn() === 'w' ? 'Weiß' : 'Schwarz');
+      if (game.in_check()) {
+        status += ' - Schach!';
+      }
+    }
+    document.getElementById('status').textContent = status;
+  }
+
+  updateStatus();
+</script>
+
+</body>
+</html>
